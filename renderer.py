@@ -68,6 +68,9 @@ Some dang ASCII art.
 
 
 def string_diagram(diagram):
+
+    if len(diagram._connections) == 0:
+        return f"{diagram._coefficient} * ∅"
     n = diagram.n
 
     # There are numbers at the top and the bottom

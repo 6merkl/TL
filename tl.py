@@ -2,6 +2,9 @@ import logging
 from fractions import Fraction
 from .diagram import Diagram
 
+import tqdm
+from itertools import product
+
 
 class TL:
     """
@@ -19,13 +22,14 @@ class TL:
 
     def __init__(self, diagrams: list = [Diagram.id(2)]):
         # Some idiot testing
-        if (not diagrams or
-            not isinstance(diagrams, list) or
+        if (not isinstance(diagrams, list) or
             not all(isinstance(diagram, Diagram) for diagram in diagrams) or
-            not all(diagram.n == diagrams[0].n for diagram in diagrams)):
-            raise ValueError(f"`diagrams` must be a non-empty list of diagrams for the same n: {diagrams}")
+            not all(diagram.n == diagrams[0].n for diagram in diagrams) or
+            not all(diagram.m == diagrams[0].m for diagram in diagrams)):
 
-        self.n = diagrams[0].n
+            raise ValueError(f"`diagrams` must be a non-empty list of diagrams of the same shape {diagrams}")
+
+        # self.n = diagrams[0].n
         self._diagrams = diagrams
 
     def id(n):
@@ -34,12 +38,25 @@ class TL:
     def U(n, i):
         return TL([Diagram.U(n, i)])
 
+    def flip(self):
+        newd = [x.flip() for x in self._diagrams]
+        return TL(newd)
+
+    def nestedCups(n):
+        return TL([Diagram([(i,2*n-1-i) for i in range(n)],n = 2*n, m = 0)])
+
+    def nestedCaps(n):
+        return TL.nestedCups(n).flip()
+
+    def empty():
+        return TL([Diagram([],n = 0, m = 0)])
+
     def compose(self, tl):
         """
         This takes `self` and stacks it on top of `tl`.
         """
 
-        return TL([a * b for a in self._diagrams for b in tl._diagrams]).condense_diagrams()
+        return TL([a * b for a,b in product(self._diagrams,tl._diagrams)]).condense_diagrams()
 
     def tensor(self, tl):
         """
@@ -50,16 +67,18 @@ class TL:
 
     def condense_diagrams(self):
         diagrams = self._diagrams.copy()
+        skip = len(diagrams)*[False]
         condensed_diagrams = []
-
-        while diagrams:
-            diagram = diagrams.pop(0)  # to keep the order
-
-            # `.copy()` is necessary because of `remove` in iteration
-            for other in diagrams.copy():
+        for i,diagram in enumerate(diagrams):
+            if skip[i]:
+                continue
+            skip[i] = True
+            for j,other in enumerate(diagrams[i:]):
+                if skip[i+j]:
+                    continue
                 if diagram._has_same_diagram_as(other):
                     diagram += other
-                    diagrams.remove(other)
+                    skip[i+j] = True
 
             if not diagram == 0:
                 condensed_diagrams.append(diagram)
@@ -70,7 +89,7 @@ class TL:
         # self subset of other
         for diagram in self._diagrams:
             # Using `diagram in other._diagrams` is not possible
-            if any(diagram._has_same_diagram_as(d) for d in other._diagrams):
+            if any(diagram == d for d in other._diagrams):
                 continue
             else:
                 logging.info(f"{repr(self)} is not euqal to {repr(other)} because of {repr(diagram)} in {repr(self)}")
@@ -79,7 +98,7 @@ class TL:
         # self superset of other
         for diagram in other._diagrams:
             # Using `diagram in self._diagrams` is not possible
-            if any(diagram._has_same_diagram_as(d) for d in self._diagrams):
+            if any(diagram == (d) for d in self._diagrams):
                 continue
             else:
                 logging.info(f"{repr(self)} is not euqal to {repr(other)} because of {repr(diagram)} in {repr(other)}")

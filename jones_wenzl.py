@@ -3,17 +3,17 @@ from .tl import TL
 
 
 class JW:
-    _cache = [TL.id(1)]
+    _cache = [TL.empty()]
 
     def get(n):
-        for i in range(n - len(JW._cache)):
+        for i in range(n + 1 - len(JW._cache)):
             JW._calculate_step()
 
-        return JW._cache[n - 1]
+        return JW._cache[n]
 
     def _calculate_step():
         # We want to calculate JW_n
-        n = len(JW._cache) + 1
+        n = len(JW._cache)
 
         jw = JW._cache[-1]
 
