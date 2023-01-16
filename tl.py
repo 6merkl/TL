@@ -137,6 +137,8 @@ class TL:
         return str(self._diagrams)
 
     def __str__(self):
+        if len(self._diagrams) == 0:
+            return "0"
         string = "\n"
 
         string += "\n +\n".join(str(diagram) for diagram in self._diagrams)
