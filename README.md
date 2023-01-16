@@ -30,7 +30,7 @@ from TL import *
 `cd` into your project directory.
 Then run
 ```
-$ git clone git@github.com:hexaron/TL.git
+$ git clone git@github.com:6merkl/TL.git
 ```
 In your project directory create a _main.py_.
 In your _main.py_ you can now import TL via:
@@ -40,6 +40,8 @@ from TL import *
 
 ## Examples
 Find many examples in the [_TL/examples.py_](https://github.com/hexaron/TL/blob/main/examples.py) file.
+
+Some examples for the characteristic p notions can be found in the jupyter notebook [_TL/pJW examples.py_](https://github.com/6merkl/TL/blob/main/pJW%20examples.ipynb)
 
 ### First example
 
